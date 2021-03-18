@@ -1,4 +1,4 @@
-import apolloClient from '../apollo/apolloClient'
+
 import SignupForm from '../components/SignupForm'
 import React from 'react'
 
@@ -12,4 +12,4 @@ const Signup = () => {
     
 }
 
-export default apolloClient(Signup)
+export default Signup

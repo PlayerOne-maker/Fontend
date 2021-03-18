@@ -1,28 +1,88 @@
-import { Component } from "react"
+import React from "react"
 import Head from "next/head"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
 import Nav from "../components/Nav"
+import AuthProvider from "../appState/AultProvider"
+import { ApolloProvider } from "@apollo/react-hooks"
+import apolloClient from "../apollo/apolloClient"
+import fetch from 'isomorphic-unfetch'
+import cookie from 'cookie'
 
-// import apolloClient from "../apollo/apolloClient"
+const QUERY_USER = {
+  query: `
+  query{
+    user{
+      id
+      name
+      email
+      carts{
+        id
+        quantity
+        product{
+          description
+          price
+          imageUrl
+        }
+      }
+      products{
+        id
+      }
+    }
+  }`
+}
 
-class MyApp extends Component{
-  
-  render(){
-    const { Component, pageProps , apollo} = this.props
-    return(
-     <>
+function MyApp({ Component, pageProps, apollo ,user }) {
+  return (
+    <ApolloProvider client={apollo}>
+      <AuthProvider userData={user}>
         <Head>
-            <title>IT Crezy</title>
+          <title>IT Crezy</title>
         </Head>
         <Header />
         <Nav />
         <Component {...pageProps} />
         <Footer />
-     </>
-    )
-  }
+      </AuthProvider>
+    </ApolloProvider>
+  )
+
 }
 
+MyApp.getInitialProps = async ({ ctx,router }) => {
+  if (process.browser) {
+    return __NEXT_DATA__.props.pageProps
+  }
 
-export default MyApp
+  console.log('Router --> ',router)
+
+  const { headers } = ctx.req
+
+  const cookies = headers && cookie.parse(headers.cookie || '')
+
+  const token = cookies && cookies.jwt
+
+
+
+  const res = await fetch("http://localhost:3001/graphql", {
+    method: 'post',
+    headers: {
+      "Content-Type": 'application/json',
+      authorization: `Bearer ${token}` || ""
+    },
+    body: JSON.stringify(QUERY_USER)
+  })
+
+  if (res.ok) {
+    const result = await res.json()
+    return {user : result.data.user}
+  } else{
+    return null
+  }
+  // calls page's `getInitialProps` and fills `appProps.pageProps`
+  // const appProps = await App.getInitialProps(appContext);
+
+  // return { ...appProps }
+}
+
+export default apolloClient(MyApp)

@@ -4,15 +4,27 @@ import { setContext } from "apollo-link-context"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import fetch from "isomorphic-unfetch"
 import withApollo from "next-with-apollo"
-import {ApolloProvider} from "@apollo/react-hooks"
+
+import cookie from 'cookie'
 
 const uri = "http://localhost:3001/graphql"
 
 const httpLink = createHttpLink({ uri, fetch })
 
 const authLink = setContext((_, { headers }) => {
-    // Get token from localStorage
-    const token = JSON.parse(localStorage.getItem("jwt"))
+    // Get token from Cookies
+    let cookies
+    //server side
+    if(headers){
+        cookies = cookie.parse(header.cookie || '')
+    }
+
+    // Client Side
+    if(typeof window !== 'undefined'){
+        cookies = cookie.parse(document.cookie || '')
+    }
+
+    const token = cookies && cookies.jwt || ''
 
     return {
         headers: {
@@ -28,12 +40,13 @@ export default withApollo(({ initialState }) => {
         cache: new InMemoryCache().restore(initialState || {})
     })
 },
-    {
-        render: ({ Page, props }) => {
-            return (
-                <ApolloProvider client={props.apollo}>
-                    <Page {...props} />
-                </ApolloProvider>
-            );
-        }
-    })
+    // {
+    //     render: ({ Page, props }) => {
+    //         return (
+    //             <ApolloProvider client={props.apollo}>
+    //                 <Page {...props} />
+    //             </ApolloProvider>
+    //         );
+    //     }
+    // }
+)

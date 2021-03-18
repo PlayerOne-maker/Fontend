@@ -2,7 +2,7 @@ import React,{ Component } from "react";
 import Link from "next/link"
 import {useQuery} from "@apollo/react-hooks"
 import gql from 'graphql-tag'
-import apolloClient from '../../apollo/apolloClient'
+
 
 const QUERY_PRODUCTS = gql`
   query {
@@ -17,8 +17,7 @@ const QUERY_PRODUCTS = gql`
 
 const Products = () => {
    
-        const {data,loading,error} = useQuery(QUERY_PRODUCTS,{
-            pollInterval: 500})
+        const {data,loading,error} = useQuery(QUERY_PRODUCTS,)
         
         if(error) return <p>Ooobs.... someting wrong, Please try again.</p>
 
@@ -68,4 +67,4 @@ const Products = () => {
     }
 
 
-export default apolloClient(Products)
+export default Products

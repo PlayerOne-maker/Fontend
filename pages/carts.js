@@ -1,14 +1,13 @@
-import { Component } from "react";
+import React,{useContext,useEffect} from "react";
 
-
-class Carts extends Component{
-    render(){
+const Carts = () =>{
+  
         return(
             <div>
                 Carts
             </div>
         )
-    }
+    
 }
 
 export default Carts
