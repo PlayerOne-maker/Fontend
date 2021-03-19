@@ -46,13 +46,14 @@ function SigninForm() {
     }
 
     const {setAuthUser} = useContext(AuthContext)
-
+    
     
     const [login,{loading,error}] = useMutation(Login, 
         { variables: { ...UserInfo } ,
         onCompleted: data => {
-            setAuthUser(data.login.user)
             localStorage.setItem('login',Date.now())
+            setAuthUser(data.login.user)  
+              
             Cookie.set("jwt",data.login.jwt)
             setUserInfo({
                 email: "",
@@ -67,11 +68,13 @@ function SigninForm() {
         try{
             e.preventDefault()
             await login()
+            
         }catch(error){
             console.log(error)
         }
     }
 
+    
 
     return (
         <div style={{
@@ -87,6 +90,10 @@ function SigninForm() {
                 password <input type="password" name="password" onChange={hadleChange} value={UserInfo.password} />
                 <button type="submit" disabled={loading}>Submit</button>
             </form>
+            <div>
+                
+                <p>Forgot password ?  <span onClick={() => Router.push('/signin/requestresetpassword')}>Click here</span></p>
+            </div>
             <div>
                 
                 {error && <p style={{

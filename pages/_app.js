@@ -49,40 +49,48 @@ function MyApp({ Component, pageProps, apollo ,user }) {
 
 }
 
-MyApp.getInitialProps = async ({ ctx,router }) => {
+MyApp.getInitialProps = async ({ ctx, router }) => {
   if (process.browser) {
     return __NEXT_DATA__.props.pageProps
   }
 
-  console.log('Router --> ',router)
+  // console.log("Router -->", router)
 
   const { headers } = ctx.req
-
-  const cookies = headers && cookie.parse(headers.cookie || '')
+  
+  const cookies = headers && cookie.parse(headers.cookie || "")
 
   const token = cookies && cookies.jwt
 
+  if (!token) {
+    if (router.pathname === "/carts" ) {
+      ctx.res.writeHead(302, { Location: "/signin" })
+      ctx.res.end()
+    }
+    return null
+  }
 
-
-  const res = await fetch("http://localhost:3001/graphql", {
-    method: 'post',
+  const response = await fetch("http://localhost:3001/graphql", {
+    method: "post",
     headers: {
-      "Content-Type": 'application/json',
+      "Content-Type": "application/json",
       authorization: `Bearer ${token}` || ""
     },
     body: JSON.stringify(QUERY_USER)
   })
 
-  if (res.ok) {
-    const result = await res.json()
-    return {user : result.data.user}
-  } else{
+  if (response.ok) {
+    const result = await response.json()
+    return { user: result.data.user }
+  } else {
+    if (router.pathname === "/carts") {
+      ctx.res.writeHead(302, { Location: "/signin" })
+      ctx.res.end()
+    }
     return null
   }
   // calls page's `getInitialProps` and fills `appProps.pageProps`
-  // const appProps = await App.getInitialProps(appContext);
-
-  // return { ...appProps }
 }
+
 
 export default apolloClient(MyApp)
